@@ -76,9 +76,9 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        frontLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        backLeftDrive.setDirection(DcMotor.Direction.FORWARD);
+        backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
@@ -89,14 +89,6 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         while (opModeIsActive()) {
 
             // Setup a variable for each drive wheel to save power level for telemetry
-            double leftPower;
-            double rightPower;
-
-            // Choose to drive using either Tank Mode, or POV Mode
-            // Comment out the method that's not used.  The default below is POV.
-
-            // POV Mode uses left stick to go forward, and right stick to turn.
-            // - This uses basic math to combine motions and is easier to drive straight.
 
 //            double magnitude = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
 //            double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
@@ -111,18 +103,20 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
 //            backRightDrive.setPower(brd);
 
             double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x * 1.5;
+            double x = gamepad1.left_stick_x /** 1.5*/;
             double rx = gamepad1.right_stick_x;
 
             double frontLeftPower = y + x + rx;
-            double backLeftPower = y - x + rx;
             double frontRightPower = y - x - rx;
+            double backLeftPower = y - x + rx;
             double backRightPower = y + x - rx;
+
+            double maxPower = 0.5;
 
             // Put powers in the range of -1 to 1 only if they aren't already (not
             // checking would cause us to always drive at full speed)
-            if (Math.abs(frontLeftPower) > 1 || Math.abs(backLeftPower) > 1 ||
-                    Math.abs(frontRightPower) > 1 || Math.abs(backRightPower) > 1 ) {
+            if (Math.abs(frontLeftPower) > maxPower || Math.abs(backLeftPower) > maxPower ||
+                    Math.abs(frontRightPower) > maxPower || Math.abs(backRightPower) > maxPower ) {
                 // Find the largest power
                 double max = 0;
                 max = Math.max(Math.abs(frontLeftPower), Math.abs(backLeftPower));
@@ -133,20 +127,27 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
                 // about signs)
 
                 frontLeftPower /= max;
-                backLeftPower /= max;
                 frontRightPower /= max;
+                backLeftPower /= max;
                 backRightPower /= max;
+
+                frontLeftPower *= maxPower;
+                frontRightPower *= maxPower;
+                backLeftPower *= maxPower;
+                backRightPower *= maxPower;
+
             }
 
             frontLeftDrive.setPower(frontLeftPower);
-            backLeftDrive.setPower(backLeftPower);
             frontRightDrive.setPower(frontRightPower);
+            backLeftDrive.setPower(backLeftPower);
             backRightDrive.setPower(backRightPower);
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
             //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             //telemetry.update();
+
         }
     }
 }
