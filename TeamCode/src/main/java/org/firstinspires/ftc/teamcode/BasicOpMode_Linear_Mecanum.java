@@ -81,11 +81,6 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         backLeftDrive.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        frontLeftDrive.setPower(0.0);
-        frontRightDrive.setPower(0.0);
-        backLeftDrive.setPower(0.0);
-        backRightDrive.setPower(0.0);
-
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
@@ -103,17 +98,50 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
             // POV Mode uses left stick to go forward, and right stick to turn.
             // - This uses basic math to combine motions and is easier to drive straight.
 
-            double magnitude = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-            double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
-            double rightX = gamepad1.right_stick_x;
-            final double fld = magnitude * Math.cos(robotAngle) + rightX;
-            final double frd = magnitude * Math.sin(robotAngle) - rightX;
-            final double bld = magnitude * Math.sin(robotAngle) + rightX;
-            final double brd = magnitude * Math.cos(robotAngle) - rightX;
-            frontLeftDrive.setPower(fld);
-            frontRightDrive.setPower(frd);
-            backLeftDrive.setPower(bld);
-            backRightDrive.setPower(brd);
+//            double magnitude = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+//            double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+//            double rightX = gamepad1.right_stick_x;
+//            final double fld = magnitude * Math.cos(robotAngle) + rightX;
+//            final double frd = magnitude * Math.sin(robotAngle) - rightX;
+//            final double bld = magnitude * Math.sin(robotAngle) + rightX;
+//            final double brd = magnitude * Math.cos(robotAngle) - rightX;
+//            frontLeftDrive.setPower(fld);
+//            frontRightDrive.setPower(frd);
+//            backLeftDrive.setPower(bld);
+//            backRightDrive.setPower(brd);
+
+            double y = -gamepad1.left_stick_y;
+            double x = gamepad1.left_stick_x * 1.5;
+            double rx = gamepad1.right_stick_x;
+
+            double frontLeftPower = y + x + rx;
+            double backLeftPower = y - x + rx;
+            double frontRightPower = y - x - rx;
+            double backRightPower = y + x - rx;
+
+            // Put powers in the range of -1 to 1 only if they aren't already (not
+            // checking would cause us to always drive at full speed)
+            if (Math.abs(frontLeftPower) > 1 || Math.abs(backLeftPower) > 1 ||
+                    Math.abs(frontRightPower) > 1 || Math.abs(backRightPower) > 1 ) {
+                // Find the largest power
+                double max = 0;
+                max = Math.max(Math.abs(frontLeftPower), Math.abs(backLeftPower));
+                max = Math.max(Math.abs(frontRightPower), max);
+                max = Math.max(Math.abs(backRightPower), max);
+
+                // Divide everything by max (it's positive so we don't need to worry
+                // about signs)
+
+                frontLeftPower /= max;
+                backLeftPower /= max;
+                frontRightPower /= max;
+                backRightPower /= max;
+            }
+
+            frontLeftDrive.setPower(frontLeftPower);
+            backLeftDrive.setPower(backLeftPower);
+            frontRightDrive.setPower(frontRightPower);
+            backRightDrive.setPower(backRightPower);
 
             // Show the elapsed game time and wheel power.
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
