@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -61,6 +62,9 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
     private DcMotor backLeftDrive = null;
     private DcMotor backRightDrive = null;
 
+    private Servo topservo = null;
+    private Servo bottomservo = null;
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -80,6 +84,12 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+
+        topservo = hardwareMap.get(Servo.class, "topservo");
+        bottomservo = hardwareMap.get(Servo.class, "bottomservo");
+
+        //topservo.setdirection(Servo.Direction.FORWARD);
+        //bottomservo.setdirection(Servo.Direction.REVERSE);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -147,6 +157,19 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
             //telemetry.addData("Status", "Run Time: " + runtime.toString());
             //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             //telemetry.update();
+
+            // run until the end of the match (driver presses STOP)
+
+
+            // check to see if we need to move the servo.
+            if(gamepad1.b) {
+                // move to 0 degrees.
+                bottomservo.setPosition(0);
+            } else if (gamepad1.x) {
+                // move to 90 degrees.
+                bottomservo.setPosition(0.5);
+            }
+
 
         }
     }
