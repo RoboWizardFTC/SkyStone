@@ -61,6 +61,7 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
     private DcMotor frontRightDrive = null;
     private DcMotor backLeftDrive = null;
     private DcMotor backRightDrive = null;
+    private DcMotor armMotor = null;
 
     private Servo topservo = null;
     private Servo bottomservo = null;
@@ -77,6 +78,8 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right");
         backLeftDrive  = hardwareMap.get(DcMotor.class, "back_left");
         backRightDrive = hardwareMap.get(DcMotor.class, "back_right");
+        armMotor = hardwareMap.get(DcMotor.class, "arm_motor");
+
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -84,6 +87,8 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+
 
         topservo = hardwareMap.get(Servo.class, "topservo");
         bottomservo = hardwareMap.get(Servo.class, "bottomservo");
@@ -94,6 +99,9 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+
+        topservo.setPosition(0);
+        bottomservo.setPosition(0);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -164,11 +172,31 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
             // check to see if we need to move the servo.
             if(gamepad1.b) {
                 // move to 0 degrees.
-                bottomservo.setPosition(0);
+                bottomservo.setPosition(0.5);
             } else if (gamepad1.x) {
                 // move to 90 degrees.
-                bottomservo.setPosition(0.5);
+                bottomservo.setPosition(-0.5);
             }
+
+//            if(gamepad1.y) {
+//                // move to 0 degrees.
+//                topservo.setPosition(0.5);
+//            } else if (gamepad1.a) {
+//                // move to 90 degrees.
+//                topservo.setPosition(-0.5);
+//            }
+
+            if (gamepad1.y || gamepad1.a) {
+                if(gamepad1.y) {
+                    armMotor.setPower(0.3);
+                } else if (gamepad1.a) {
+                    armMotor.setPower(-0.3);
+                }
+            } else {
+                armMotor.setPower(0.0);
+            }
+
+
 
 
         }
