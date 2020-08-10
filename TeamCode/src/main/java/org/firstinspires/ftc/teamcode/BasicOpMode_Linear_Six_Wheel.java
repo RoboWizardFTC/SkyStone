@@ -33,8 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -52,33 +51,34 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Linear OpMode Linear Actuator", group="Linear Opmode")
+@TeleOp(name="Basic: Linear OpMode Six Wheel", group="Linear Opmode")
 //@Disabled
-public class BasicOpMode_Linear_LinearActuator extends LinearOpMode {
+public class BasicOpMode_Linear_Six_Wheel extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+    private DcMotor leftMotor1 = null;
+    private DcMotor leftMotor2 = null;
+    private DcMotor rightMotor1 = null;
+    private DcMotor rightMotor2 = null;
 
-    private DcMotor actuatorMotor = null;
-
-    private DigitalChannel minLimiter = null;
-    private DigitalChannel maxLimiter = null;
 
     @Override
     public void runOpMode() {
-
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        actuatorMotor  = hardwareMap.get(DcMotor.class, "actuator");
+        leftMotor1  = hardwareMap.get(DcMotor.class, "left_motor_1");
+        leftMotor2  = hardwareMap.get(DcMotor.class, "left_motor_2");
+        rightMotor1  = hardwareMap.get(DcMotor.class, "right_motor_1");
+        rightMotor2  = hardwareMap.get(DcMotor.class, "right_motor_2");
 
-        minLimiter = hardwareMap.get(DigitalChannel.class, "min_limiter");
-        maxLimiter = hardwareMap.get(DigitalChannel.class, "max_limiter");
-
-        minLimiter.setMode(DigitalChannel.Mode.INPUT);
-        maxLimiter.setMode(DigitalChannel.Mode.INPUT);
-
-        actuatorMotor.setDirection(DcMotor.Direction.REVERSE);
+        // Most robots need the motor on one side to be reversed to drive forward
+        // Reverse the motor that runs backwards when connected directly to the battery
+        leftMotor1.setDirection(DcMotor.Direction.REVERSE);
+        leftMotor2.setDirection(DcMotor.Direction.REVERSE);
+        rightMotor1.setDirection(DcMotor.Direction.FORWARD);
+        rightMotor2.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -87,28 +87,32 @@ public class BasicOpMode_Linear_LinearActuator extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            double actuatorPower = gamepad1.left_stick_y * 0.5;
-            boolean minState = minLimiter.getState();
-            boolean maxState = maxLimiter.getState();
+            // Setup a variable for each drive wheel to save power level for telemetry
+            double leftPower;
+            double rightPower;
 
-            if (!minState) {
-                if (actuatorPower < 0.0) {
-                    actuatorPower = 0.0;
-                }
-            }
+            double multiplier = 0.3;
 
-            if (!maxState) {
-                if (actuatorPower > 0.0) {
-                    actuatorPower = 0.0;
-                }
-            }
+            // Choose to drive using either Tank Mode, or POV Mode
+            // Comment out the method that's not used.  The default below is POV.
 
-            actuatorMotor.setPower(actuatorPower);
+            // POV Mode uses left stick to go forward, and right stick to turn.
+            // - This uses basic math to combine motions and is easier to drive straight.
+            double drive = -gamepad1.left_stick_y;
+            double turn  =  gamepad1.right_stick_x;
+            leftPower    = multiplier * Range.clip(drive + turn, -1.0, 1.0) ;
+            rightPower   = multiplier * Range.clip(drive - turn, -1.0, 1.0) ;
 
+            // Send calculated power to wheels
+            leftMotor1.setPower(leftPower);
+            leftMotor2.setPower(leftPower);
+            rightMotor1.setPower(rightPower);
+            rightMotor2.setPower(rightPower);
+
+            // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Limit switches", "min (%b), max (%b)", minState, maxState);
+            telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
             telemetry.update();
-
         }
     }
 }
