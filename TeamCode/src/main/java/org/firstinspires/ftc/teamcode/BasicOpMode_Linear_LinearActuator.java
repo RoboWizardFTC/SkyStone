@@ -78,7 +78,7 @@ public class BasicOpMode_Linear_LinearActuator extends LinearOpMode {
         minLimiter.setMode(DigitalChannel.Mode.INPUT);
         maxLimiter.setMode(DigitalChannel.Mode.INPUT);
 
-        actuatorMotor.setDirection(DcMotor.Direction.REVERSE);
+        actuatorMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -87,7 +87,7 @@ public class BasicOpMode_Linear_LinearActuator extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            double actuatorPower = gamepad1.left_stick_y * 0.5;
+            double actuatorPower = -gamepad1.left_stick_y * 0.5;
             boolean minState = minLimiter.getState();
             boolean maxState = maxLimiter.getState();
 
@@ -106,6 +106,7 @@ public class BasicOpMode_Linear_LinearActuator extends LinearOpMode {
             actuatorMotor.setPower(actuatorPower);
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Motors", "Actuator Power (%.2f)",  actuatorPower);
             telemetry.addData("Limit switches", "min (%b), max (%b)", minState, maxState);
             telemetry.update();
 
