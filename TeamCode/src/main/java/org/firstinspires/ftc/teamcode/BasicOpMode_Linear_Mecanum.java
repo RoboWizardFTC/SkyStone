@@ -37,6 +37,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -63,8 +65,8 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
     private DcMotor backRightDrive = null;
     private DcMotor armMotor = null;
 
-    private Servo topservo = null;
-    private Servo bottomservo = null;
+//    private Servo topservo = null;
+    private Servo clawservo = null;
 
     @Override
     public void runOpMode() {
@@ -80,6 +82,8 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         backRightDrive = hardwareMap.get(DcMotor.class, "back_right");
         armMotor = hardwareMap.get(DcMotor.class, "arm_motor");
 
+//        topservo = hardwareMap.get(Servo.class, "topservo");
+        clawservo = hardwareMap.get(Servo.class, "clawservo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -89,24 +93,17 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         armMotor.setDirection(DcMotor.Direction.FORWARD);
 
-
-        topservo = hardwareMap.get(Servo.class, "topservo");
-        bottomservo = hardwareMap.get(Servo.class, "bottomservo");
-
-        //topservo.setdirection(Servo.Direction.FORWARD);
-        //bottomservo.setdirection(Servo.Direction.REVERSE);
-
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        topservo.setPosition(0);
-        bottomservo.setPosition(0);
+//        topservo.setPosition(0);
+        clawservo.setPosition(0);
 
-        // run until the end of the match (driver presses STOP)
+
         while (opModeIsActive()) {
 
-            // Setup a variable for each drive wheel to save power level for telemetry
+
 
 //            double magnitude = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
 //            double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
@@ -161,40 +158,45 @@ public class BasicOpMode_Linear_Mecanum extends LinearOpMode {
             backLeftDrive.setPower(backLeftPower);
             backRightDrive.setPower(backRightPower);
 
-            // Show the elapsed game time and wheel power.
-            //telemetry.addData("Status", "Run Time: " + runtime.toString());
-            //telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-            //telemetry.update();
-
-            // run until the end of the match (driver presses STOP)
-
-
-            // check to see if we need to move the servo.
-            if(gamepad1.b) {
-                // move to 0 degrees.
-                bottomservo.setPosition(0.5);
-            } else if (gamepad1.x) {
-                // move to 90 degrees.
-                bottomservo.setPosition(-0.5);
-            }
-
-//            if(gamepad1.y) {
-//                // move to 0 degrees.
-//                topservo.setPosition(0.5);
-//            } else if (gamepad1.a) {
-//                // move to 90 degrees.
-//                topservo.setPosition(-0.5);
-//            }
-
             if (gamepad1.y || gamepad1.a) {
-                if(gamepad1.y) {
+                if(gamepad1.a) {
                     armMotor.setPower(0.3);
-                } else if (gamepad1.a) {
+                } else if (gamepad1.y) {
                     armMotor.setPower(-0.3);
                 }
             } else {
                 armMotor.setPower(0.0);
             }
+
+            // check to see if we need to move the servo.
+            //if(gamepad1.b || gamepad1.x) {
+                if(gamepad1.b) {
+                    clawservo.setPosition(0.05);
+                } else if (gamepad1.x) {
+                    clawservo.setPosition(0.4);
+                }
+
+
+//        double gamepadPosition = gamepad1.right_stick_y;
+//            double servoPosition = (gamepadPosition + 1.0) / 2.0;
+//
+//
+//            clawservo.setPosition(servoPosition);
+            sleep(100);
+
+        // Show the elapsed game time and wheel power.
+//        telemetry.addData("Status", "Run Time: " + runtime.toString());
+//        telemetry.addData("Servo", "Gamepad (%.2f), Position (%.2f)", gamepadPosition, servoPosition);
+//        telemetry.update();
+
+//            if(gamepad1.y) {
+//                // move to 0 degrees.
+//                topservo.setPosition(0.5);
+//            } else if (gamepad1.a) {//                // move to 90 degrees.
+//                topservo.setPosition(-0.5);
+//            }
+
+
 
 
 
